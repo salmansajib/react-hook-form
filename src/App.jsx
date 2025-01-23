@@ -1,14 +1,24 @@
 import { useForm } from "react-hook-form";
+import { Oval } from "react-loader-spinner";
 
 function App() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setError,
+    formState: { errors, isSubmitting },
   } = useForm();
 
-  const onFormSubmit = (data) => {
-    console.log(data);
+  const onFormSubmit = async (data) => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      throw new Error();
+      // console.log(data);
+    } catch (error) {
+      setError("root", {
+        message: "This email is already taken",
+      });
+    }
   };
 
   return (
@@ -36,7 +46,11 @@ function App() {
           type="text"
           placeholder="Email"
         />
-        {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+        {errors.email && (
+          <p className="text-red-500 text-left w-full">
+            {errors.email.message}
+          </p>
+        )}
         {/* password field */}
         <input
           {...register("password", {
@@ -46,8 +60,8 @@ function App() {
               message: "Password must be at least 8 characters long.",
             },
             pattern: {
-              value:
-                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]+$/,
+              // value:
+              //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]+$/,
               message:
                 "Password must include uppercase, lowercase, a number, and a special character.",
             },
@@ -57,12 +71,33 @@ function App() {
           placeholder="Password"
         />
         {errors.password && (
-          <p className="text-red-500">{errors.password.message}</p>
+          <p className="text-red-500 text-left w-full">
+            {errors.password.message}
+          </p>
         )}
 
-        <button className="bg-blue-300 hover:bg-blue-400 text-slate-950 w-full py-1 rounded-[4px] transition-colors">
-          Submit
+        <button
+          disabled={isSubmitting}
+          className="bg-blue-300 hover:bg-blue-400 text-slate-950 w-full py-1 rounded-[4px] transition-colors flex items-center justify-center"
+        >
+          {isSubmitting ? (
+            <Oval
+              visible={true}
+              height="24"
+              width="24"
+              color="#020617"
+              ariaLabel="oval-loading"
+              wrapperStyle={{}}
+              wrapperClass=""
+            />
+          ) : (
+            "Submit"
+          )}
         </button>
+
+        {errors.root && (
+          <p className="text-red-500 text-left w-full">{errors.root.message}</p>
+        )}
       </form>
     </div>
   );
